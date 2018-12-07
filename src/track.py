@@ -41,6 +41,7 @@ class Track():
 		self.finish_line = self.find_finish_line() #Find the x-range & y-range of the wall
 		self.wall_points = self.find_wall_points(self.data)
 		self.track_points = self.find_track_points(self.data)
+		self.valid_points = self.track_points + self.start_points
 
 	#=============================
 	# print_track()
@@ -152,9 +153,11 @@ class Track():
 	#@return	bool result
 	#=============================
 	def is_wall_point(self, position):
-		if position[0] > self.shape[0] or position[1] > self.shape[1]:
+		if position[0] > (self.shape[0]-1) or position[1] > (self.shape[1]-1):
 			return True
-		if (self.data[position[0]][position[1]] == self.WALL_CHAR):
+		elif(position[0] < 0 or position[1] < 0):
+			return True
+		elif(self.data[position[0]][position[1]] == self.WALL_CHAR):
 			return True
 		else:
 			return False

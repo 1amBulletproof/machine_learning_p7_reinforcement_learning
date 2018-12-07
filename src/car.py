@@ -64,7 +64,7 @@ class Car():
 			#Crossed the finish line!
 			return True
 		elif (self.will_crash(next_position)):
-			print('crashing')
+			#print('crashing')
 			#Handle crash
 			self.crash()
 		else:
