@@ -26,7 +26,7 @@ class RaceSimulator:
 		self.track = track
 		#Keep track of the board
 		self.display_track = copy.copy(track.data)
-		self.prev_char_removed = ''
+		self.prev_char_removed = 'S' #assumes you start on a start line
 		self.car_symbol = car_symbol
 		#Keep track of game status
 		self.game_state = np.zeros(track.shape)
@@ -48,18 +48,32 @@ class RaceSimulator:
 			print(''.join(str(n) for n in lines))
 
 	#=============================
+	# print_history()
+	#	- print the state of the game
+	#=============================
+	def print_history(self):
+		print()
+		print('HISTORY')
+		print('-------')
+		for idx in range(0, len(self.history)):
+			position = self.history[idx]
+			self.display_track[position[0]][position[1]] = idx
+		for lines in self.display_track:
+			print(''.join(str(n) for n in lines))
+
+	#=============================
 	# move()
 	#	- update the game for a move
 	#	- check to see if the game is over
 	#=============================
 	def move(self, car):
-		self.iterations += 1
 		crossed_finish = car.move()
 		if (crossed_finish):
 			#Crossed the finish line!
 			print('Passed finish line!')
 			return True
 
+		self.iterations += 1 #we will not count the winning move
 		self.history.append(car.position)
 		car_prev = car.previous_position
 		car_pos = car.position
@@ -75,21 +89,30 @@ class RaceSimulator:
 		return False
 
 	#=============================
-	# race()
-	#	- race a car through a track
+	# create_start_car()
+	#	- initialize car
+	#@param	crash_algo 0 = minor crash, 1 = major crash
 	#=============================
-	def race(self, crash_algo ):
+	def create_start_car(self, crash_algo):
 		#Get a random starting point
 		num_start_pos = len(self.track.start_points)
 		start_pos = random.randrange(num_start_pos)
 		start_pt = self.track.start_points[start_pos]
-
 		init_velocity = [0,0]
 		car = Car(self.track, start_pt, init_velocity, crash_algo)
+		return car
 
+	#=============================
+	# race()
+	#	- race a car through a track
+	#=============================
+	def race(self, crash_algo ):
+		car = self.create_start_car(crash_algo)
+
+		start_pt = car.position 
 		self.prev_char_removed = self.display_track[start_pt[0]][start_pt[1]]
 		self.display_track[start_pt[0]][start_pt[1]] = self.car_symbol
-		self.iterations += 1
+		self.iterations = 0
 		self.history.append(car.position)
 
 		done = False
@@ -113,6 +136,10 @@ class RaceSimulator:
 				car.accelerate(accel)
 			else:
 				print('wrong key, use wasd and space')
+
+		self.print_state(car)
+		self.print_history()
+		return (self.iterations, self.history)
 
 	
 #=============================

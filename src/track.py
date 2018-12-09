@@ -243,7 +243,6 @@ class Track():
 	#@return	TRUE if at or beyond on the finish line, otherwise false
 	#=============================
 	def check_finish_line(self, position1, position2):
-		#TODO: implement
 		crossed_finish_line = False
 
 		position1 = np.array(position1)

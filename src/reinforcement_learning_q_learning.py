@@ -2,7 +2,7 @@
 
 #@author		Brandon Tarney
 #@date			12/5/2018
-#@description	Reinforcement Learning w/ Value Iteration
+#@description	Reinforcement Learning w/ Q-learning Iteration
 
 import numpy as np
 import pandas as pd
@@ -16,19 +16,21 @@ from track import Track
 from car import Car
 
 #=============================
-# ReinforcementLearningValueIteration
+# ReinforcementLearningQLearning
 #
-# - Class to encapsulate a reinforcement learning value iteration model
+# - Class to encapsulate a reinforcement learning q-learning iteration model
 #=============================
 class ReinforcementLearningQLearning(BaseModel, RaceSimulator ) :
 
-	#Assumes data is 
+	#=============================
+	# __init__()
+	#	- create track, super class constructors, and create initial model states & values
+	#=============================
 	def __init__(self, file_name):
 		new_track = Track(file_name)
 		BaseModel.__init__(self, new_track.data)
 		RaceSimulator.__init__(self, new_track)
-		#acceleration possible
-		#self.actions = [(-1,-1),(-1,0),(-1,1), (0,-1),(0,0),(0,1), (1,-1),(1,0),(1,1)]
+		#acceleration possible [(-1,-1),(-1,0),(-1,1), (0,-1),(0,0),(0,1), (1,-1),(1,0),(1,1)]
 		self.velocity_range = 11 # This is {+/-5} offset from 0
 		self.velocity_offset = 5
 		self.accel_range = 3 # This is {+/-1} offset from 0
@@ -90,20 +92,6 @@ class ReinforcementLearningQLearning(BaseModel, RaceSimulator ) :
 		return car
 
 	#=============================
-	# create_start_car()
-	#	- initialize car
-	#@param	crash_algo 0 = minor crash, 1 = major crash
-	#=============================
-	def create_start_car(self, crash_algo):
-		#Get a random starting point
-		num_start_pos = len(self.track.start_points)
-		start_pos = random.randrange(num_start_pos)
-		start_pt = self.track.start_points[start_pos]
-		init_velocity = [0,0]
-		car = Car(self.track, start_pt, init_velocity, crash_algo)
-		return car
-
-	#=============================
 	# train()
 	#	- Learn Values of every state (via q-learning)
 	#=============================
@@ -114,7 +102,7 @@ class ReinforcementLearningQLearning(BaseModel, RaceSimulator ) :
 		discount_factor = 0.95
 		reward = -1
 		epsilon_value = 0.5 #half the time we explore, the other half we exploit
-		decay = 0.999
+		decay = 0.9999
 
 		self.history_of_learning = list() #store number of test_steps taken per iteration
 		self.converge_result = list() #store whether it converged
@@ -183,17 +171,16 @@ class ReinforcementLearningQLearning(BaseModel, RaceSimulator ) :
 	#	- test the model (i.e. traverse using policy (maxQ value)
 	#@return				value of performance
 	#=============================
-	def test(self):
+	def test(self, crash_algorithm):
 		self.iterations = 0
 		epsilon_value = 0 #Will allow use epsilon greedy algo to get 100% exploitation action
 
 		#Initialize car to random location
 		car = self.create_start_car(0)
+		self.history.append(car.position)
 
 		crossed_finish = False
 		while(not crossed_finish and self.iterations < 999):
-			print('sanity')
-			self.history.append(car.position)
 			self.print_state(car)
 			#get proper indexing for state-action (q-table) 
 			x_idx = car.position[0]
@@ -211,6 +198,8 @@ class ReinforcementLearningQLearning(BaseModel, RaceSimulator ) :
 			if done:
 				crossed_finish = True
 
+		self.print_state(car)
+		self.print_history()
 		return (self.iterations, self.history)
 
 #=============================
@@ -242,10 +231,10 @@ def main():
 		#print('steps:', learn_result[0][idx], 'converged', learn_result[1][idx])
 
 	print()
-	test_result = q_learning.test()
-	print('Test results')
-	print('iterations', test_result[0])
-	print('history', test_result[1])
+	test_result = q_learning.test(crash_algo)
+	#print('Test results')
+	#print('iterations', test_result[0])
+	#print('history', test_result[1])
 
 
 if __name__ == '__main__':

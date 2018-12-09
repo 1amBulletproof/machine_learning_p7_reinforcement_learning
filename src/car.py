@@ -36,7 +36,6 @@ class Car():
 	#=============================
 	def accelerate(self, acceleration):
 		acceleration_limit = 1
-		#TODO: apply 20% failure rate
 		if abs(acceleration[0]) > acceleration_limit or abs(acceleration[1]) > acceleration_limit:
 			print('bad acceleration:', acceleration)
 			return
@@ -64,7 +63,6 @@ class Car():
 			#Crossed the finish line!
 			return True
 		elif (self.will_crash(next_position)):
-			#print('crashing')
 			#Handle crash
 			self.crash()
 		else:
