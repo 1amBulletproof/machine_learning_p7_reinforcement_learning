@@ -98,9 +98,9 @@ class ReinforcementLearningValueIteration(BaseModel, RaceSimulator):
 		bellman_error_magnitude = 0.1
 		self.training_iterations = 0
 		max_delta = 0
+		error_history = [max_delta]
 
 		done = False
-		#while(not done and self.training_iterations < max_iterations):
 		while(not done and self.training_iterations < max_iterations):
 			max_delta = 0
 			self.training_iterations += 1
@@ -161,10 +161,11 @@ class ReinforcementLearningValueIteration(BaseModel, RaceSimulator):
 								max_delta = delta
 							#The action associated with this q-value is now the policy
 							self.p_table[x][y][x_vel][y_vel] = policy
+			error_history.append(max_delta)
 			if max_delta < bellman_error_magnitude:
 				done = True
 
-		return self.training_iterations
+		return (self.training_iterations, error_history)
 
 	#=============================
 	# test()
@@ -209,11 +210,13 @@ def main():
 	parser.add_argument('track_file', type=str, default=1, help='track file name')
 	parser.add_argument('max_iterations', type=int, default=999, help='max number of iterations')
 	parser.add_argument('crash_algorithm', type=int, default=0, help='crash algo: 0 = minor, 1 = major')
+	parser.add_argument('learning_analysis', type=int, default=0, help='do learning analysis or not, 0 = no, 1 = yes')
 	args = parser.parse_args()
 
 	track_file = args.track_file
 	max_iterations = args.max_iterations
 	crash_algo = args.crash_algorithm
+	learning_analysis = args.learning_analysis
 
 	print()
 	print('Training file:', track_file, 'for max itr', max_iterations, ' and crash algo:', crash_algo)
@@ -226,9 +229,14 @@ def main():
 
 	print()
 	test_result = value_iteration.test(crash_algo)
-	#print('Test results')
-	#print('iterations', test_result[0])
-	#print('history', test_result[1])
+
+	if learning_analysis != 0:
+		print()
+		print('learning analysis')
+		print('Training file:', track_file, 'for max iter', max_iterations, ' and crash algo:', crash_algo)
+		print('Train Itr, Max Error')
+		for idx in range(0, learn_result[0]):
+			print(idx, learn_result[1][idx])
 
 
 if __name__ == '__main__':

@@ -120,11 +120,13 @@ def main():
 	parser.add_argument('track_file', type=str, default=1, help='track file name')
 	parser.add_argument('number_of_iterations', type=int, default=999, help='number of iterations')
 	parser.add_argument('crash_algorithm', type=int, default=0, help='crash algo: 0 = minor, 1 = major')
+	parser.add_argument('learning_analysis', type=int, default=0, help='do learning analysis or not, 0 = no, 1 = yes')
 	args = parser.parse_args()
 
 	track_file = args.track_file
 	num_iterations = args.number_of_iterations
 	crash_algo = args.crash_algorithm
+	learning_analysis = args.learning_analysis
 
 	print()
 	print('Training file:', track_file, 'for', num_iterations, ' and crash algo:', crash_algo)
@@ -132,18 +134,17 @@ def main():
 	print()
 	sarsa_learning = ReinforcementLearningSarsaLearning(track_file)
 	learn_result = sarsa_learning.train(num_iterations, crash_algo)
-	print('Training results')
-	print('len', len(learn_result[0]))
-	false_vals = [a for a in learn_result[1] if a == False] 
-	print('len false', len(false_vals))
-	#for idx in range(0, len(learn_result[0])):
-		#print('steps:', learn_result[0][idx], 'converged', learn_result[1][idx])
 
 	print()
 	test_result = sarsa_learning.test(crash_algo)
-	#print('Test results')
-	#print('iterations', test_result[0])
-	#print('history', test_result[1])
+
+	if learning_analysis != 0:
+		print()
+		print('learning analysis')
+		print('Training file:', track_file, 'for', num_iterations, ' and crash algo:', crash_algo)
+		print('Train Iteration, Steps required')
+		for idx in range(0, len(learn_result[0])):
+			print(idx, learn_result[0][idx])
 
 
 if __name__ == '__main__':
